@@ -12,9 +12,13 @@ Route::get('/home', function () {
     return redirect('/dashboard');
 });
 
-Route::get('/dashboard', [dashboardController::class, 'index'])->name('dashboard');
+// Protect the dashboard so only logged-in students can see it
+Route::get('/dashboard', [dashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('dashboard');
 
-
-
-Route::get('/login', [authController::class, 'login']);
-Route::post('/login', [authController::class, 'store']);
+// Keep the login routes for guests only
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [authController::class, 'login'])->name('login');
+    Route::post('/login', [authController::class, 'store'])->name('store');
+});

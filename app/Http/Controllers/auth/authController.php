@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -10,24 +11,46 @@ use Inertia\Inertia;
 
 class authController extends Controller
 {
-    public function store(Request $request)
-    {
-        $credentials = $request->validate([
-            'studentID' => 'required|integer',
-            'password' => 'required',
-        ]);
+    public function store(Request $request){
+    $credentials = $request->validate([
+        'studentID' => 'required', // Removed 'integer' in case ID has leading zeros or symbols
+        'password' => 'required',
+    ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return inertia::render('dashboard/index');
-        }
+    $user = Student::query()->where('studentID', $credentials['studentID'])->first();
 
-        throw ValidationException::withMessages([
-            'studentID' => ['The provided credentials do not match our records.'],
-        ]);
+    // Plaintext password comparison is insecure and not recommended.
+    // This only works if the DB stores the raw password text (not bcrypt/argon hashes).
+    if ($user && hash_equals((string) $user->password, (string) $credentials['password'])) {
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
     }
+
+    if (false && Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+        
+        // ✅ ALWAYS redirect after a successful POST request
+        return redirect()->intended('/dashboard');
+    }
+
+    throw ValidationException::withMessages([
+        'studentID' => ['The provided credentials do not match our records.'],
+    ]);
+    }
+
     public function login()
     {
         return inertia::render('Auth/login');
     }
+
+    public function logout(Request $request)
+{
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/login');
+}
 }
