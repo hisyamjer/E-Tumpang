@@ -3,7 +3,7 @@ import { useForm } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {uitm} from '@/assets/uitm.png';
+import uitmUrl from '@/Asset/uitm.png';
 import { Card,
   CardAction,
   CardContent,
@@ -28,9 +28,10 @@ const submit = () => {
 
 
 <template>
-  <img src="@/Asset/uitm.png" alt="UITM Logo" class="w-32 h-32 absolute top-4 left-4">
-    <div class="justify-center items-center flex h-screen">
-      <Card class="w-full max-w-sm">
+  <div class="flex h-screen items-center justify-center">
+    <div class="flex w-full max-w-sm flex-col items-center gap-6">
+      <img :src="uitmUrl" alt="UITM Logo" class="h-32 w-32" />
+      <Card class="w-full">
         <CardHeader>
           <CardTitle>Login to E-Tumpang</CardTitle>
           <CardDescription>
@@ -78,4 +79,5 @@ const submit = () => {
         </CardFooter>
       </Card>
     </div>
+  </div>
 </template>
