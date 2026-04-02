@@ -14,4 +14,14 @@ class Feedback extends Model
         'comment',
         'feedback_date',
     ];
+
+    public function trip()
+    {
+        return $this->belongsTo(Trip::class, 'tripID', 'tripID');
+    }
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'studentID', 'studentID');
+    }
 }

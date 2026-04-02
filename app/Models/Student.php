@@ -40,4 +40,21 @@ class Student extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'studentID', 'studentID');
+    }
+
+    public function trips()
+    {
+        return $this->hasMany(Trip::class, 'studentID', 'studentID');
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'studentID', 'studentID');
+    }
 }
+
+

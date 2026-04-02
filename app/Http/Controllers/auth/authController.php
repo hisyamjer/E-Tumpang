@@ -25,7 +25,8 @@ class authController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->intended('/dashboard');
+        // Let the middleware force role selection first.
+        return redirect()->route('role.index');
     }
 
     if (false && Auth::attempt($credentials)) {
@@ -45,9 +46,10 @@ class authController extends Controller
         return inertia::render('Auth/login');
     }
 
-    public function logout(Request $request)
+public function logout(Request $request)
 {
     Auth::logout();
+    $request->session()->forget('user_role');
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 

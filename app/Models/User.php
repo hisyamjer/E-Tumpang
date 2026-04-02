@@ -12,13 +12,23 @@ class User extends Authenticatable
 
     protected $table = 'user';
     protected $primaryKey = 'userID';
+    public $incrementing = true;
 
     protected $fillable = [
         'userID',
         'studentID',
         'role',
         'plate_number',
+        'model',
         'created_at',
         'updated_at'
     ];
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'studentID', 'studentID');
+    }
 }
+
+
+
