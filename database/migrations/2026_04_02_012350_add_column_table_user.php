@@ -13,7 +13,7 @@ return new class extends Migration
     {
     Schema::table('user', function (Blueprint $table) {
     $table->boolean('is_default')->default(false)->after('plate_number');
-    $table->string('model')->after('plate_number');
+    $table->string('model')->nullable()->after('plate_number');
     });
     }
 

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class CarController extends Controller
@@ -21,10 +20,21 @@ class CarController extends Controller
         'plate_number' => 'required|string|max:255',
     ]);
 
-    $user = Auth::user();
-    
-    // Explicitly update the specific userID to be safe
-    $updated = User::where('userID', $user->userID)->update([
+    // In this app, the authenticated model is `Student`, not `User`.
+    $student = $request->user();
+
+    // Ensure the `user` row exists for this student, then update car details.
+    $user = User::firstOrCreate(
+        ['studentID' => $student->studentID],
+        [
+            'role' => (string) session('user_role', 'passenger'),
+            // `model` is currently NOT NULL in your DB, so we must provide a value on insert.
+            // A later migration can make it nullable if you prefer.
+            'model' => '',
+        ]
+    );
+
+    $updated = $user->update([
         'model' => $validated['model'],
         'plate_number' => $validated['plate_number'],
     ]);
