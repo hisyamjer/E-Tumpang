@@ -6,13 +6,10 @@ use App\Http\Controllers\destinationController;
 use App\Http\Controllers\auth\authController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\carController;
+use App\Http\Controllers\BookingController;
 
 Route::get('/', function () {
     return redirect('/login');
-});
-
-Route::get('/home', function () {
-    return redirect('/dashboard');
 });
 
 // Protect the dashboard so only logged-in students can see it
@@ -36,6 +33,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'check.role'])->group(function () {
     Route::get('/dashboard', [dashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dbdriver', [dashboardController::class, 'index']);
+    Route::get('/dbpassenger', [dashboardController::class, 'index']);
 
     Route::get('/destination', [destinationController::class, 'index'])->name('destination');
     Route::post('/destination', [destinationController::class, 'store'])->name('destination.store');
@@ -45,5 +44,9 @@ Route::middleware(['auth', 'check.role'])->group(function () {
 
     Route::get('/car', [carController::class, 'index']);
     Route::post('/car', [carController::class, 'store']);
+
+    Route::get('/booking', [BookingController::class, 'index'])->name('booking');
+    Route::post('/booking/{trip}', [BookingController::class, 'join']);
+    Route::delete('/booking/{id}', [BookingController::class, 'destroy']);
 
 });

@@ -16,6 +16,10 @@ class Trip extends Model
         'tripID',
         'bookingID',
         'studentID',
+        'car_model',
+        'plate_number',
+        'description',
+        'gender_pref',
         'destination',
         'departure_time',
         'date',
@@ -32,6 +36,8 @@ class Trip extends Model
     'longitude' => 'float',
 ];
 
+    protected $appends = ['seats_remaining'];
+
     public function booking()
     {
         return $this->belongsTo(Booking::class, 'bookingID', 'bookingID');
@@ -45,6 +51,11 @@ class Trip extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'tripID', 'tripID');
+    }
+
+    public function getSeatsRemainingAttribute()
+    {
+        return $this->available_seats - $this->bookings()->count();
     }
 
     

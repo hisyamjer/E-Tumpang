@@ -5,22 +5,31 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MapPin, Clock, Users, Banknote, Calendar, Car, Info, ChevronLeft } from 'lucide-vue-next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+const props = defineProps({
+  auth: Object
+});
 
 const form = useForm({
   destination: '',
   departure_time: '',
-  available_seats: 1,
+  available_seats: 4,
   status: 'available',
   price: '',
   latitude: 3.1390,
   longitude: 101.6869,
   date: '',
+  gender_pref: 'Mixed',
+  description: '',
+  car_model: props.auth.user.model || '', 
+  plate_number: props.auth.user.plate_number || '',
 });
 
-// Fix for Leaflet marker icons not showing up in build tools
 const fixLeafletIcons = () => {
   delete L.Icon.Default.prototype._getIconUrl;
   L.Icon.Default.mergeOptions({
@@ -32,17 +41,12 @@ const fixLeafletIcons = () => {
 
 onMounted(() => {
   fixLeafletIcons();
-
-  // Initialize map ONLY after component is mounted
   const map = L.map('map-container').setView([form.latitude, form.longitude], 13);
-
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map);
 
-  const marker = L.marker([form.latitude, form.longitude], {
-    draggable: true
-  }).addTo(map);
+  const marker = L.marker([form.latitude, form.longitude], { draggable: true }).addTo(map);
 
   marker.on('dragend', function (event) {
     const position = event.target.getLatLng();
@@ -56,85 +60,158 @@ async function fetchAddress(lat, lng) {
   try {
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
     const data = await response.json();
-    if (data.display_name) {
-      form.destination = data.display_name;
-    }
-  } catch (e) {
-    console.error("Mapping service unavailable", e);
-  }
+    if (data.display_name) { form.destination = data.display_name; }
+  } catch (e) { console.error("Mapping service unavailable", e); }
 }
 
-const submit = () => {
-  form.post('/destination');
-};
+const submit = () => { form.post('/destination'); };
 </script>
 
 <template>
   <Head title="New Trip | E-Tumpang" />
   <appLayout>
     <template #header>
-      <h1 >New Trip</h1>
+      <div class="flex items-center gap-4">
+        <Link href="/destination" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+          <ChevronLeft class="h-5 w-5 text-slate-600" />
+        </Link>
+        <h2 class="">Post a New Trip</h2>
+      </div>
     </template>
 
-    <div class="py-12 flex justify-center">
-      <Card class="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle>Create a new trip</CardTitle>
-        </CardHeader>
+    <div class="py-8 px-8 max-w-4xl">
+      <form @submit.prevent="submit" class="space-y-12">
+        
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Step 1</h3>
+            <h4 class="text-lg font-semibold text-slate-900">Route & Location</h4>
+            <p class="text-sm text-slate-500 mt-2">Specify where you're heading by dragging the map marker.</p>
+          </div>
+          
+          <div class="md:col-span-2 space-y-4">
+            <div id="map-container" class="w-full h-[300px] rounded-lg border border-slate-200 z-0 shadow-sm bg-slate-50"></div>
+             <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-start gap-3">
+               <MapPin class="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+               <div>
+                 <p class="text-sm font-bold text-slate-900">Destination</p>
+                 <p class="text-sm text-slate-600">{{ form.destination || 'Select a point on the map' }}</p>
+               </div>
+             </div>
 
-        <CardContent>
-          <form id="trip-form" class="space-y-6" @submit.prevent="submit">
-            <!-- Map Section -->
-            <div class="space-y-2">
-              <Label>Destination (Drag marker to pinpoint)</Label>
-              <div id="map-container" class="w-full h-[400px] rounded-lg border z-0"></div>
-              <div class="p-3 bg-muted/50 rounded-md text-sm border">
-                <p class="font-medium text-primary">{{ form.destination || 'Select a location on the map...' }}</p>
-                <p class="text-xs text-muted-foreground mt-1">Lat: {{ form.latitude }}, Lng: {{ form.longitude }}</p>
+             <div class="space-y-2">
+               <Label class="text-slate-700">Destination (Manual)</Label>
+               <Input v-model="form.destination" placeholder="Type destination if map lookup fails" />
+               <p v-if="form.errors.destination" class="text-xs text-destructive">{{ form.errors.destination }}</p>
+             </div>
+           </div>
+         </section>
+
+        <hr class="border-slate-200" />
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Step 2</h3>
+            <h4 class="text-lg font-semibold text-slate-900">Schedule & Fare</h4>
+            <p class="text-sm text-slate-500 mt-2">When are you leaving and what's the cost per seat?</p>
+          </div>
+
+          <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+             <div class="space-y-2">
+               <Label class="text-slate-700">Departure Date</Label>
+               <Input type="date" v-model="form.date" />
+               <p v-if="form.errors.date" class="text-xs text-destructive">{{ form.errors.date }}</p>
+             </div>
+             <div class="space-y-2">
+               <Label class="text-slate-700">Departure Time</Label>
+               <Input type="time" v-model="form.departure_time" />
+               <p v-if="form.errors.departure_time" class="text-xs text-destructive">{{ form.errors.departure_time }}</p>
+             </div>
+             <div class="space-y-2">
+               <Label class="text-slate-700">Available Seats</Label>
+               <Input type="number" v-model="form.available_seats" min="1" max="6" />
+               <p v-if="form.errors.available_seats" class="text-xs text-destructive">{{ form.errors.available_seats }}</p>
+             </div>
+             <div class="space-y-2">
+               <Label class="text-slate-700">Price (RM)</Label>
+               <Input type="number" step="0.10" v-model="form.price" placeholder="0.00" />
+               <p v-if="form.errors.price" class="text-xs text-destructive">{{ form.errors.price }}</p>
+             </div>
+           </div>
+         </section>
+
+        <hr class="border-slate-200" />
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Step 3</h3>
+            <h4 class="text-lg font-semibold text-slate-900">Preferences</h4>
+            <p class="text-sm text-slate-500 mt-2">Your car details will be attached automatically.</p>
+          </div>
+
+          <div class="md:col-span-2 space-y-6">
+            <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200 border-dashed">
+              <Car class="h-6 w-6 text-slate-400" />
+              <div class="flex-1">
+                <p class="text-xs font-bold text-slate-500 uppercase">Current Vehicle</p>
+                <p class="text-sm font-medium text-slate-900">{{ form.car_model }} • {{ form.plate_number }}</p>
               </div>
-              <Input type="hidden" v-model="form.destination" />
+              <Link href="/car" class="text-xs text-blue-600 font-bold hover:underline italic">Update Car</Link>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-2">
-                <Label for="departure_time">Departure Time</Label>
-                <Input id="departure_time" type="time" v-model="form.departure_time" :error="!!form.errors.departure_time" />
+                <Label class="text-slate-700">Car Model</Label>
+                <Input v-model="form.car_model" placeholder="e.g. Perodua Myvi" />
+                <p v-if="form.errors.car_model" class="text-xs text-destructive">{{ form.errors.car_model }}</p>
               </div>
-
               <div class="space-y-2">
-                <Label for="available_seats">Available Seats</Label>
-                <Input id="available_seats" type="number" v-model="form.available_seats" />
+                <Label class="text-slate-700">Plate Number</Label>
+                <Input v-model="form.plate_number" placeholder="e.g. JQH 1234" class="uppercase font-mono tracking-wider" />
+                <p v-if="form.errors.plate_number" class="text-xs text-destructive">{{ form.errors.plate_number }}</p>
               </div>
             </div>
-
+ 
             <div class="space-y-2">
-              <Label for="price">Price (RM)</Label>
-              <Input id="price" type="number" step="0.01" v-model="form.price" placeholder="0.00" />
+              <Label class="text-slate-700">Passenger Preference</Label>
+              <Select v-model="form.gender_pref">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Mixed">Mixed (Default)</SelectItem>
+                  <SelectItem value="Male Only">Male Only</SelectItem>
+                  <SelectItem value="Female Only">Female Only</SelectItem>
+                </SelectContent>
+              </Select>
+              <p v-if="form.errors.gender_pref" class="text-xs text-destructive">{{ form.errors.gender_pref }}</p>
             </div>
 
             <div class="space-y-2">
-              <Label for="date">Date</Label>
-              <Input id="date" type="date" step="0.01" v-model="form.date" />
+              <Label class="text-slate-700">Driver's Note (Instructions)</Label>
+              <Textarea 
+                v-model="form.description" 
+                placeholder="Where should they wait for you?" 
+                class="resize-none h-24"
+              />
             </div>
-          </form>
-        </CardContent>
+          </div>
+        </section>
 
-        <CardFooter class="flex justify-between border-t p-6">
-          <Button variant="outline" asChild>
-            <Link href="/destination">Cancel</Link>
+        <div class="flex items-center justify-end gap-4 pt-8 border-t border-slate-200">
+          <Button variant="ghost" asChild class="px-8">
+            <Link href="/destination">Discard</Link>
           </Button>
-          <Button @click="submit" :disabled="form.processing">
-            {{ form.processing ? 'Creating...' : 'Create Trip' }}
+          <Button @click="submit" :disabled="form.processing" class="bg-slate-900 px-12 h-11 text-base">
+            {{ form.processing ? 'Posting...' : 'Post Trip Now' }}
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+
+      </form>
     </div>
   </appLayout>
 </template>
 
 <style scoped>
-/* Ensure leaflet doesn't conflict with sidebar/layouts */
-#map-container {
-  overflow: hidden;
-}
+#map-container { overflow: hidden; }
 </style>

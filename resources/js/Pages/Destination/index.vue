@@ -43,9 +43,17 @@ const formatTime = (timeString) => {
   return `${hours}:${minutes} ${ampm}`;
 };
 
-const formatDate = (dateString) => {
+  const formatDate = (dateString) => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleDateString('en-GB'); 
+};
+
+const genderPrefLabel = (pref) => {
+  if (!pref) return 'Mixed (Everyone)';
+  if (pref === 'Male Only') return 'Lelaki Sahaja (Male Only)';
+  if (pref === 'Female Only') return 'Perempuan Sahaja (Female Only)';
+  if (pref === 'Mixed') return 'Mixed (Everyone)';
+  return pref;
 };
 
  function cancelTrip(id) {
@@ -96,6 +104,13 @@ const formatDate = (dateString) => {
             <span class="text-sm">{{ trip.bookings_count }} / {{ trip.available_seats }}</span>
           </div>
           <Progress :value="(trip.bookings_count / trip.available_seats) * 100" class="h-2" />
+
+          <div class="mt-4 flex items-center justify-between gap-3">
+            <span class="text-sm font-medium">Passenger Preference:</span>
+            <Badge variant="secondary" class="whitespace-nowrap">
+              {{ genderPrefLabel(trip.gender_pref) }}
+            </Badge>
+          </div>
         </CardContent>
 
         <CardFooter class="border-t bg-muted/50 gap-2 p-4">
