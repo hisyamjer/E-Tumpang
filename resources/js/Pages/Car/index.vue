@@ -1,7 +1,7 @@
 <script setup>
 import appLayout from '@/Layouts/sidebar.vue';
-import { Head, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, useForm, usePage} from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +23,10 @@ const submit = () => {
         onSuccess: () => isEditing.value = false,
     });
 };
+
+const page = usePage()
+const message = computed(() => page.props.flash.message)
+const error   = computed(() => page.props.flash.error)
 </script>
 
 <template>
@@ -31,6 +35,14 @@ const submit = () => {
         <template #header>
             <h2 class="text-2xl font-bold tracking-tight text-slate-900">Vehicle Management</h2>
         </template>
+
+        <div v-if="message" class="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+            {{ message }}
+        </div>
+
+        <div v-if="error" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+            {{ error }}
+        </div>
 
         <div class="py-10 px-6 max-w-2xl mx-auto">
             <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-200">

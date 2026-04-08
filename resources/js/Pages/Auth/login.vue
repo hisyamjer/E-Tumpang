@@ -1,5 +1,5 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, Head } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,6 +28,7 @@ const submit = () => {
 
 
 <template>
+<Head title="Login | E-Tumpang" />
   <div class="flex h-screen items-center justify-center">
     <div class="flex w-full max-w-sm flex-col items-center gap-6">
       <img :src="uitmUrl" alt="UITM Logo" class="h-32 w-32" />

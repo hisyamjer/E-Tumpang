@@ -1,7 +1,7 @@
 <script setup>
 import appLayout from '@/Layouts/sidebar.vue'
 import { computed } from 'vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link, router,usePage } from '@inertiajs/vue3'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -52,6 +52,10 @@ const cancelBooking = (bookingID) => {
         });
     }
 }
+
+const page = usePage()
+const message = computed(() => page.props.flash.message)
+const error   = computed(() => page.props.flash.error)
 </script>
 
 <template>
@@ -71,6 +75,14 @@ const cancelBooking = (bookingID) => {
         <Button variant="outline" as-child>
           <Link href="/dashboard">Back to Dashboard</Link>
         </Button>
+      </div>
+
+      <div v-if="message" class="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+        {{ message }}
+      </div>
+
+      <div v-if="error" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+        {{ error }}
       </div>
 
       <Separator />

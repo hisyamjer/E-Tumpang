@@ -14,6 +14,7 @@ class destinationController extends Controller
         $now = now(config('app.timezone'));
         $trips = Trip::query()
             ->where('studentID', auth()->id())
+            ->where('status', 'available')
             ->withCount('bookings')
             ->orderByDesc('departure_time')
             ->get()
@@ -24,9 +25,13 @@ class destinationController extends Controller
                 if (preg_match('/^\d{2}:\d{2}$/', $departureTime)) {
                     $departureTime .= ':00';
                 }
+
+                $tripDate = $trip->date instanceof \Carbon\CarbonInterface
+                    ? $trip->date->format('Y-m-d')
+                    : trim((string) $trip->date);
                 $departure = Carbon::createFromFormat(
                     'Y-m-d H:i:s',
-                    $trip->date . ' ' . $departureTime,
+                    $tripDate . ' ' . $departureTime,
                     config('app.timezone')
                 );
                 //for check the trip is less than 1 hour from real time
@@ -51,7 +56,7 @@ class destinationController extends Controller
             'destination' => 'required|string|max:255',
             'departure_time' => 'required|date_format:H:i',
             'available_seats' => 'required|integer|min:1',
-            'status' => 'in:available,booked',
+            'status' => 'in:available,booked,completed',
             'price' => 'required|numeric|min:0',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
@@ -79,7 +84,7 @@ class destinationController extends Controller
 
          Trip::create($validated);
 
-        return redirect()->route('destination')->with('success', 'Destination created successfully.');
+        return redirect()->route('destination')->with('message', 'Destination created successfully.');
     }
 
     public function update ( Request $request, Trip $trip) {
@@ -87,7 +92,7 @@ class destinationController extends Controller
             'destination' => 'required|string|max:255',
             'departure_time' => 'required|date_format:H:i',
             'available_seats' => 'required|integer|min:1',
-            'status' => 'in:available,booked',
+            'status' => 'in:available,booked,completed',
             'price' => 'required|numeric|min:0',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
@@ -104,7 +109,7 @@ class destinationController extends Controller
             $trip->update($validated);
             return redirect()->route('destination')->
             
-            with('success', 'Trip was updated');
+            with('message', 'Trip was updated');
     }
 
     public function destroy ( Trip $trip) {
@@ -114,6 +119,40 @@ class destinationController extends Controller
     }
         $trip->delete();
 
-        return redirect()->route('destination')->with('success', 'Trip was cancel');
+        return redirect()->route('destination')->with('message', 'Trip was cancel');
+    }
+
+    public function arrive ($id) {
+        $trip = Trip::findOrFail($id);
+
+        // Only the driver can mark it as arrived
+        if ((int) $trip->studentID !== (int) auth()->id()) {
+            return redirect()->back()->with('error', 'Unauthorized');
+        }
+
+        // Must be past departure time
+        $departureTime = trim((string) $trip->departure_time);
+                if (preg_match('/^\d{2}:\d{2}$/', $departureTime)) {
+                    $departureTime .= ':00';
+                }
+
+                $tripDate = $trip->date instanceof \Carbon\CarbonInterface
+                    ? $trip->date->format('Y-m-d')
+                    : trim((string) $trip->date);
+                $departure = Carbon::createFromFormat(
+                    'Y-m-d H:i:s',
+                    $tripDate . ' ' . $departureTime,
+                    config('app.timezone')
+        );
+
+        if((now(config('app.timezone'))->lessThanOrEqualTo($departure))){    
+            return back()->with('error','You cannot complete a trip before departure time');
+        }
+
+        $trip->update([
+            'status' => 'completed',
+        ]);
+
+        return back()->with('message', 'Trip marked as arrived');
     }
 }

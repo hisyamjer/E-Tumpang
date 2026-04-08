@@ -31,9 +31,12 @@ class dashboardController extends Controller
                         $departureTime .= ':00';
                     }
 
+                    $tripDate = $trip->date instanceof \Carbon\CarbonInterface
+                        ? $trip->date->format('Y-m-d')
+                        : trim((string) $trip->date);
                     $departure = \Carbon\Carbon::createFromFormat(
                         'Y-m-d H:i:s',
-                        $trip->date . ' ' . $departureTime,
+                        $tripDate . ' ' . $departureTime,
                         config('app.timezone')
                     );
 
@@ -62,9 +65,12 @@ class dashboardController extends Controller
                     $departureTime .= ':00';
                 }
 
+                $tripDate = $trip->date instanceof \Carbon\CarbonInterface
+                    ? $trip->date->format('Y-m-d')
+                    : trim((string) $trip->date);
                 $departure = \Carbon\Carbon::createFromFormat(
                     'Y-m-d H:i:s',
-                    $trip->date . ' ' . $departureTime,
+                    $tripDate . ' ' . $departureTime,
                     config('app.timezone')
                 );
 

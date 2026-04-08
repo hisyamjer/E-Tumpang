@@ -7,6 +7,8 @@ use App\Http\Controllers\auth\authController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\carController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\historyController;
+
 
 Route::get('/', function () {
     return redirect('/login');
@@ -41,6 +43,7 @@ Route::middleware(['auth', 'check.role'])->group(function () {
     Route::put('/destination/{trip}', [destinationController::class, 'update'])->name('destination.update');
     Route::get('/destination/create', [destinationController::class, 'create'])->name('destination.create');
     Route::post('/destination/{trip}/delete', [destinationController::class, 'destroy']);
+    Route::post('/destination/{trip}/arrive', [destinationController::class, 'arrive']);
 
     Route::get('/car', [carController::class, 'index']);
     Route::post('/car', [carController::class, 'store']);
@@ -48,5 +51,7 @@ Route::middleware(['auth', 'check.role'])->group(function () {
     Route::get('/booking', [BookingController::class, 'index'])->name('booking');
     Route::post('/booking/{trip}', [BookingController::class, 'join']);
     Route::delete('/booking/{id}', [BookingController::class, 'destroy']);
+
+    Route::get('/history', [historyController::class, 'index']);
 
 });

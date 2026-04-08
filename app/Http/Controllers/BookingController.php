@@ -36,12 +36,19 @@ class BookingController extends Controller
 
         // 2. RULE: Must book at least 1 hour before departure
         // Combine date and time into a single Carbon object
+        $departureTime = trim((string) $trip->departure_time);
+        if (preg_match('/^\d{2}:\d{2}$/', $departureTime)) {
+            $departureTime .= ':00';
+        }
+        $tripDate = $trip->date instanceof \Carbon\CarbonInterface
+            ? $trip->date->format('Y-m-d')
+            : trim((string) $trip->date);
         $departureDatetime = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $trip->date . ' ' . $trip->departure_time,
+            'Y-m-d H:i:s',
+            $tripDate . ' ' . $departureTime,
             config('app.timezone')
         );
-         
+          
         if (now(config('app.timezone'))->addHour()->greaterThan($departureDatetime)) {
             return back()->with('error', 'Booking closed! You must book at least 1 hour before departure.');
         }
@@ -86,9 +93,16 @@ class BookingController extends Controller
 
         // 3. Optional: Add a "1-hour before" rule for cancellation too
         // This prevents passengers from canceling last minute
+        $departureTime = trim((string) $booking->trip->departure_time);
+        if (preg_match('/^\d{2}:\d{2}$/', $departureTime)) {
+            $departureTime .= ':00';
+        }
+        $tripDate = $booking->trip->date instanceof \Carbon\CarbonInterface
+            ? $booking->trip->date->format('Y-m-d')
+            : trim((string) $booking->trip->date);
         $departure = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $booking->trip->date . ' ' . $booking->trip->departure_time,
+            'Y-m-d H:i:s',
+            $tripDate . ' ' . $departureTime,
             config('app.timezone')
         );
         if (now(config('app.timezone'))->addHour()->greaterThan($departure)) {

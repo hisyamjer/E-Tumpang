@@ -1,7 +1,7 @@
 <script setup>
   import { computed } from 'vue'
   import { Link, usePage } from '@inertiajs/vue3'
-  import { Home, Car, Settings, LogOut, ChevronsUpDown, UserCircle } from 'lucide-vue-next'
+  import { Home, Car, Settings, LogOut, ChevronsUpDown, UserCircle, History } from 'lucide-vue-next'
   import {
     Sidebar,
     SidebarContent,
@@ -57,6 +57,7 @@ import {
         { name: 'Home', icon: Home, link: '/dashboard' },
         { name: 'Destination', icon: Car, link: '/destination' },
         { name: 'My Vehicles', icon: UserCircle, link: '/car'},
+        { name: 'History', icon: History, link: '/history' }
 
       ]
     } else {

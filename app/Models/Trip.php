@@ -34,7 +34,8 @@ class Trip extends Model
     protected $casts = [
     'latitude' => 'float',
     'longitude' => 'float',
-];
+    'date' => 'date:Y-m-d',
+ ];
 
     protected $appends = ['seats_remaining'];
 

@@ -1,12 +1,23 @@
 <script setup>
 import appLayout from '@/Layouts/sidebar.vue'
 import { computed } from 'vue'
-import { Head, router, Link } from '@inertiajs/vue3'
+import { Head, router, Link, usePage } from '@inertiajs/vue3'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { MapPin, Clock, Calendar, Users, Info } from 'lucide-vue-next'
+import { MapPin, Clock, Calendar, Users, Info, User, Phone, Car, Hash } from 'lucide-vue-next'
+
+// Import your existing shadcn dialog components
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
 
 const props = defineProps({
   trips: {
@@ -50,6 +61,10 @@ const seatsLeft = (trip) => {
 const joinTrip = (tripID) => {
   router.post(`/booking/${tripID}`, {}, { preserveScroll: true })
 }
+
+const page = usePage()
+const message = computed(() => page.props.flash.message)
+const error   = computed(() => page.props.flash.error)
 </script>
 
 <template>
@@ -63,12 +78,19 @@ const joinTrip = (tripID) => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight">Passenger Dashboard</h1>
-          <p class="text-muted-foreground">Browse available trips and book a seat.</p>
+          <h1 class="text-2xl font-bold tracking-tight text-slate-900">Passenger Dashboard</h1>
+          <p class="text-muted-foreground text-sm">Browse available trips and book a seat.</p>
         </div>
         <Button variant="outline" as-child>
           <Link href="/booking">My Bookings</Link>
         </Button>
+      </div>
+
+      <div v-if="message" class="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800 font-medium">
+        {{ message }}
+      </div>
+      <div v-if="error" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800 font-medium">
+        {{ error }}
       </div>
 
       <Separator />
@@ -78,69 +100,109 @@ const joinTrip = (tripID) => {
       </div>
 
       <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card v-for="trip in tripRows" :key="trip.tripID" class="overflow-hidden">
+        <Card v-for="trip in tripRows" :key="trip.tripID" class="overflow-hidden border-slate-200 shadow-sm transition-all hover:shadow-md">
           <CardHeader class="bg-primary/5 pb-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <Badge variant="outline" class="bg-background whitespace-nowrap flex items-center gap-1">
-                <Calendar class="h-3.5 w-3.5" />
+              <Badge variant="outline" class="bg-background font-semibold">
+                <Calendar class="mr-1 h-3.5 w-3.5 text-primary" />
                 {{ formatDate(trip.date) }}
               </Badge>
-              <Badge variant="outline" class="bg-background whitespace-nowrap flex items-center gap-1">
-                <Clock class="h-3.5 w-3.5" />
+              <Badge variant="outline" class="bg-background font-semibold">
+                <Clock class="mr-1 h-3.5 w-3.5 text-primary" />
                 {{ formatTime(trip.departure_time) }}
               </Badge>
             </div>
 
-            <CardTitle class="pt-2 text-base font-bold leading-tight break-words flex items-start gap-2">
+            <CardTitle class="pt-2 text-base font-bold flex items-start gap-2">
               <MapPin class="mt-0.5 h-4 w-4 text-primary shrink-0" />
               <span>{{ trip.destination }}</span>
             </CardTitle>
 
-            <div class="flex flex-col gap-1 border-t border-primary/10 pt-2 mt-2">
-                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                    <Car class="h-3.5 w-3.5 text-primary" />
-                    <span>{{ trip.car_model }} • {{ trip.plate_number }}</span>
+            <div class="flex items-center justify-between border-t border-primary/10 pt-3 mt-2">
+              <div class="flex items-center gap-2">
+                <div class="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User class="h-3.5 w-3.5 text-primary" />
                 </div>
-                <p class="text-[10px] text-muted-foreground uppercase tracking-tight">
-                    Driver: {{ trip.student?.name }}
-                </p>
+                <span class="text-xs font-bold text-slate-700 truncate max-w-[100px]">{{ trip.student?.name }}</span>
+              </div>
+
+              <Dialog>
+                <DialogTrigger as-child>
+                  <Button variant="ghost" size="sm" class="h-auto p-0 text-[11px] font-bold text-primary hover:bg-transparent hover:underline">
+                    <Info class="mr-1 h-3 w-3" /> Driver Details
+                  </Button>
+                </DialogTrigger>
+                
+                <DialogContent class="sm:max-w-[350px] rounded-xl">
+                  <DialogHeader class="items-center text-center">
+                    <div class="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mb-2">
+                      <User class="h-8 w-8 text-slate-400" />
+                    </div>
+                    <DialogTitle class="text-lg font-bold">{{ trip.student?.name }}</DialogTitle>
+                    <DialogDescription class="text-xs uppercase tracking-tight font-medium">
+                      Verified Driver Profile
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div class="grid gap-3 py-4">
+                    <div class="flex items-center justify-between rounded-lg border p-3 bg-slate-50/50">
+                      <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+                        <Car class="h-4 w-4" /> <span>Vehicle</span>
+                      </div>
+                      <span class="text-sm font-bold">{{ trip.car_model }}</span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-lg border p-3 bg-slate-50/50">
+                      <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+                        <Hash class="h-4 w-4" /> <span>Plate No</span>
+                      </div>
+                      <span class="text-sm font-bold uppercase">{{ trip.plate_number }}</span>
+                    </div>
+                  </div>
+
+                  <DialogFooter>
+                    <Button class="w-full font-bold">
+                      <Phone class="mr-2 h-4 w-4" /> {{ trip.student?.phone_number }}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
 
           <CardContent class="pt-4 space-y-4">
             <div class="flex items-center justify-between text-sm">
-              <span class="font-medium flex items-center gap-1">
-                <Users class="h-4 w-4" />
-                Seats left
+              <span class="font-medium flex items-center gap-1.5 text-slate-500">
+                <Users class="h-4 w-4" /> Seats available
               </span>
-              <Badge :variant="seatsLeft(trip) > 0 ? 'default' : 'secondary'">
+              <Badge :variant="seatsLeft(trip) > 0 ? 'default' : 'secondary'" class="font-bold">
                 {{ seatsLeft(trip) }} / {{ trip.available_seats }}
               </Badge>
             </div>
 
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-sm font-medium">Passenger Preference:</span>
-              <Badge variant="secondary" class="whitespace-nowrap">
+            <div class="flex items-center justify-between gap-3 text-sm">
+              <span class="font-medium text-slate-500">Preference:</span>
+              <Badge variant="secondary" class="font-bold">
                 {{ genderPrefLabel(trip.gender_pref) }}
               </Badge>
             </div>
 
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-sm font-medium">Price:</span>
-              <span class="text-sm font-semibold">RM {{ trip.price }}</span>
+            <div class="flex items-center justify-between gap-3 text-sm">
+              <span class="font-medium text-slate-500">Fare:</span>
+              <span class="text-lg font-bold text-primary">RM {{ trip.price }}</span>
             </div>
 
-            <div v-if="trip.description" class="p-2 bg-amber-50 border border-amber-200 rounded text-[11px] text-amber-800 flex gap-2 italic">
-                <Info class="h-3.5 w-3.5 shrink-0 text-amber-600" />
-                <span>"{{ trip.description }}"</span>
+            <div v-if="trip.description" class="p-3 bg-amber-50/50 border border-amber-100 rounded-lg text-[11px] text-amber-800 flex gap-2 italic">
+              <Info class="h-3.5 w-3.5 shrink-0 text-amber-500" />
+              <span>"{{ trip.description }}"</span>
             </div>
 
             <Button
-              class="w-full"
+              class="w-full font-bold shadow-sm transition-all active:scale-[0.98]"
               :disabled="seatsLeft(trip) <= 0"
               @click="joinTrip(trip.tripID)"
+              :variant="seatsLeft(trip) > 0 ? 'default' : 'secondary'"
             >
-              {{ seatsLeft(trip) > 0 ? 'Book Seat' : 'Full' }}
+              {{ seatsLeft(trip) > 0 ? 'Book My Seat' : 'Trip Full' }}
             </Button>
           </CardContent>
         </Card>

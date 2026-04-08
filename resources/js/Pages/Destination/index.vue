@@ -1,13 +1,12 @@
 <script setup>
 import appLayout from '@/Layouts/sidebar.vue';
 import { computed } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-vue-next';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 
 const props = defineProps({
   trips: {
@@ -62,6 +61,14 @@ const genderPrefLabel = (pref) => {
   }
 };
 
+const markArrived = (id) => {
+  router.post(`/destination/${id}/arrive`)
+}
+
+const page = usePage()
+const message = computed(() => page.props.flash.message)
+const error   = computed(() => page.props.flash.error)
+
 </script>
 
 <template>
@@ -81,6 +88,14 @@ const genderPrefLabel = (pref) => {
           <Plus class="mr-2 h-4 w-4" /> New Trip
         </Link>
       </Button>
+    </div>
+
+    <div v-if="message" class="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+      {{ message }}
+    </div>
+
+    <div v-if="error" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+      {{ error }}
     </div>
 
     <Separator />
@@ -103,8 +118,7 @@ const genderPrefLabel = (pref) => {
             <span class="text-sm font-medium">Seats Taken:</span>
             <span class="text-sm">{{ trip.bookings_count }} / {{ trip.available_seats }}</span>
           </div>
-          <Progress :value="(trip.bookings_count / trip.available_seats) * 100" class="h-2" />
-
+          
           <div class="mt-4 flex items-center justify-between gap-3">
             <span class="text-sm font-medium">Passenger Preference:</span>
             <Badge variant="secondary" class="whitespace-nowrap">
@@ -114,8 +128,14 @@ const genderPrefLabel = (pref) => {
         </CardContent>
 
         <CardFooter class="border-t bg-muted/50 gap-2 p-4">
-          <Button variant="outline" size="sm" class="flex-1">Edit</Button>
-          <Button variant="destructive" size="sm" class="flex-1" @click="cancelTrip(trip.tripID)">Cancel</Button>
+          <Button variant="destructive" size="sm" class="flex-1 " @click="cancelTrip(trip.tripID)">Cancel</Button>
+          <Button v-if="trip.status === 'available'" class="bg-green-600 hover:bg-green-700 text-white" @click="markArrived(trip.tripID)">
+              Mark as Arrived
+          </Button>
+
+          <Badge v-if="trip.status === 'completed'" variant="secondary">
+              Completed
+          </Badge>
         </CardFooter>
       </Card>
     </div>

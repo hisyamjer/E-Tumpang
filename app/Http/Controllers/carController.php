@@ -43,6 +43,6 @@ class CarController extends Controller
         return redirect()->back()->with('message', 'Car details updated successfully!');
     }
 
-    return redirect()->back()->with('error', 'Failed to update database.');
+    return redirect()->back()->with('error', 'Failed to update car details.');
 }
 }
