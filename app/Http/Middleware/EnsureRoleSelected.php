@@ -9,6 +9,11 @@ class EnsureRoleSelected
 {
     public function handle(Request $request, Closure $next)
     {
+        // Admins do not participate in student role selection (driver/passenger).
+        if ($request->user('admin')) {
+            return $next($request);
+        }
+
         if (!session()->has('user_role')) {
         return redirect()->route('role.index');
     }
@@ -25,4 +30,3 @@ class EnsureRoleSelected
     }
 
 }
-

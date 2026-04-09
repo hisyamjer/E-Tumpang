@@ -20,8 +20,10 @@ class authController extends Controller
 
     $admin = Admin::where('email', $credentials['studentID'])->first();
 
-    if($admin && hash_equals((string) $admin->password, (string) $credentials['password'])){
+    // Admin passwords are stored as plain text (no bcrypt).
+    if ($admin && hash_equals((string) $admin->password, (string) $credentials['password'])) {
         Auth::guard('admin')->login($admin);
+        $request->session()->forget('user_role');
         $request->session()->regenerate();
         return redirect()->route('admin.dashboard');
     }
@@ -31,7 +33,7 @@ class authController extends Controller
     // Plaintext password comparison is insecure and not recommended.
     // This only works if the DB stores the raw password text (not bcrypt/argon hashes).
     if ($user && hash_equals((string) $user->password, (string) $credentials['password'])) {
-        Auth::login($user);
+        Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
         // Let the middleware force role selection first.
@@ -58,7 +60,14 @@ class authController extends Controller
 
 public function logout(Request $request)
 {
-    Auth::logout();
+    if (Auth::guard('admin')->check()) {
+        Auth::guard('admin')->logout();
+    }
+
+    if (Auth::guard('web')->check()) {
+        Auth::guard('web')->logout();
+    }
+
     $request->session()->forget('user_role');
     $request->session()->invalidate();
     $request->session()->regenerateToken();

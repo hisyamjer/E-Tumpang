@@ -36,9 +36,7 @@ class Student extends Authenticatable
      */
     protected function casts(): array
     {
-        return [
-            'password' => 'hashed',
-        ];
+        return [];
     }
 
     public function user()
@@ -56,5 +54,4 @@ class Student extends Authenticatable
         return $this->hasMany(Booking::class, 'studentID', 'studentID');
     }
 }
-
 

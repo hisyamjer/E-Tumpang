@@ -38,8 +38,9 @@ import {
  
   // 2. Formatting values for display
   const userName = computed(() => user.value?.name ?? 'User')
-  const studentId = computed(() => user.value?.studentID ?? '')
+  const userSecondary = computed(() => user.value?.studentID ?? user.value?.email ?? '')
   const userRole = computed(() => {
+    if (role.value === 'admin') return 'Admin'
     if (role.value === 'driver') return 'Driver'
     if (role.value === 'passenger') return 'Passenger'
     return 'Student'
@@ -138,14 +139,14 @@ import {
                     </div>
                     <div class="grid flex-1 text-left text-sm leading-tight">
                       <span class="truncate font-semibold">{{ userName }}</span>
-                      <span class="truncate text-xs text-muted-foreground">{{ studentId }}</span>
+                      <span class="truncate text-xs text-muted-foreground">{{ userSecondary }}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
-                
-                <DropdownMenuSeparator />
+                 
+                <DropdownMenuSeparator v-if="role !== 'admin'" />
 
-                <DropdownMenuItem>
+                <DropdownMenuItem v-if="role !== 'admin'">
                   <User class="size-4 mr-2" />
                   <Link 
                     href="/reset-role" 

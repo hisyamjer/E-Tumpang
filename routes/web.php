@@ -17,11 +17,11 @@ Route::get('/', function () {
 // Protect the dashboard so only logged-in students can see it
 
 Route::post('/logout', [authController::class, 'logout'])
-    ->middleware('auth')
+    ->middleware('auth:web,admin')
     ->name('logout');
 
 // Keep the login routes for guests only
-Route::middleware('guest')->group(function () {
+Route::middleware('guest:web,admin')->group(function () {
     Route::get('/login', [authController::class, 'login'])->name('login');
     Route::post('/login', [authController::class, 'store'])->name('store');
 });

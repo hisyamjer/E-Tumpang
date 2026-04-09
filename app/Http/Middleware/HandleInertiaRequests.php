@@ -35,28 +35,50 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $student = $request->user();
+        $admin = $request->user('admin');
+        $student = $request->user('web');
         $studentUser = $student?->user;
+
+        $guard = null;
+        $role = null;
+        $authUser = null;
+
+        if ($admin) {
+            $guard = 'admin';
+            $role = 'admin';
+            $authUser = [
+                'adminID' => $admin->adminID,
+                'studentID' => null,
+                'name' => 'Admin',
+                'email' => $admin->email,
+                'role' => 'admin',
+            ];
+        } elseif ($student) {
+            $guard = 'web';
+            $role = $request->session()->get('user_role') ?? $studentUser?->role;
+            $authUser = [
+                'studentID' => $student->studentID,
+                'name' => $student->name,
+                'email' => $student->email,
+                'role' => $role,
+                'model' => $studentUser?->model,
+                'plate_number' => $studentUser?->plate_number,
+                'is_default' => $studentUser?->is_default,
+            ];
+        }
 
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $student ? [
-                    'studentID' => $student->studentID,
-                    'name' => $student->name,
-                    'email' => $student->email,
-                    'role' => $request->session()->get('user_role') ?? $studentUser?->role,
-                    'model' => $studentUser?->model,
-                    'plate_number' => $studentUser?->plate_number,
-                    'is_default' => $studentUser?->is_default,
-                ] : null,
-                'role' => fn () => $request->session()->get('user_role') ?? $studentUser?->role,
-        ],
+                'user' => $authUser,
+                'role' => fn () => $role,
+                'guard' => fn () => $guard,
+            ],
 
-        'flash' => [
-            'message' => fn () => $request->session()->get('message'),
-            'error' => fn () => $request->session()->get('error'),
-        ],
-    ];
+            'flash' => [
+                'message' => fn () => $request->session()->get('message'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
+        ];
     }
 }

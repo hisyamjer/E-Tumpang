@@ -10,11 +10,10 @@ import { Head, router, Link, usePage } from '@inertiajs/vue3'
 <template>
 <appLayout>
     <Head title="Admin | E-Tumpang" />
-
     <template #header>
         <h1>Dashboard</h1>
     </template>
-
+    
 
 </appLayout>
 </template>
