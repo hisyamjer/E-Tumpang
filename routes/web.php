@@ -25,32 +25,44 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [authController::class, 'store'])->name('store');
 });
 
+Route::middleware('auth:admin')->group(function () {
+    
+});
+
 Route::middleware('auth')->group(function () {
     // The selection page
     Route::get('/choose-role', [RoleController::class, 'index'])->name('role.index');
     // The selection logic
     Route::post('/set-role', [RoleController::class, 'store'])->name('role.store');
+    Route::post('/reset-role', [RoleController::class, 'reset'])->name('role.reset');
 });
 
 Route::middleware(['auth', 'check.role'])->group(function () {
+    
+    // --- SHARED ROUTES ---
     Route::get('/dashboard', [dashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dbdriver', [dashboardController::class, 'index']);
-    Route::get('/dbpassenger', [dashboardController::class, 'index']);
-
-    Route::get('/destination', [destinationController::class, 'index'])->name('destination');
-    Route::post('/destination', [destinationController::class, 'store'])->name('destination.store');
-    Route::put('/destination/{trip}', [destinationController::class, 'update'])->name('destination.update');
-    Route::get('/destination/create', [destinationController::class, 'create'])->name('destination.create');
-    Route::post('/destination/{trip}/delete', [destinationController::class, 'destroy']);
-    Route::post('/destination/{trip}/arrive', [destinationController::class, 'arrive']);
-
-    Route::get('/car', [carController::class, 'index']);
-    Route::post('/car', [carController::class, 'store']);
-
-    Route::get('/booking', [BookingController::class, 'index'])->name('booking');
-    Route::post('/booking/{trip}', [BookingController::class, 'join']);
-    Route::delete('/booking/{id}', [BookingController::class, 'destroy']);
-
     Route::get('/history', [destinationController::class, 'history']);
+
+    // --- DRIVER ROUTES ---
+    Route::group([], function () {
+        Route::get('/dbdriver', [dashboardController::class, 'index']);
+        Route::get('/destination', [destinationController::class, 'index'])->name('destination');
+        Route::get('/destination/create', [destinationController::class, 'create'])->name('destination.create');
+        Route::post('/destination', [destinationController::class, 'store'])->name('destination.store');
+        Route::put('/destination/{trip}', [destinationController::class, 'update'])->name('destination.update');
+        Route::post('/destination/{trip}/delete', [destinationController::class, 'destroy']);
+        Route::post('/destination/{trip}/arrive', [destinationController::class, 'arrive']);
+        
+        Route::get('/car', [carController::class, 'index']);
+        Route::post('/car', [carController::class, 'store']);
+    });
+
+    // --- PASSENGER ROUTES ---
+    Route::group([], function () {
+        Route::get('/dbpassenger', [dashboardController::class, 'index']);
+        Route::get('/booking', [BookingController::class, 'index'])->name('booking');
+        Route::post('/booking/{trip}', [BookingController::class, 'join']);
+        Route::delete('/booking/{id}', [BookingController::class, 'destroy']);
+    });
 
 });

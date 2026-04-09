@@ -4,6 +4,7 @@ namespace App\Http\Controllers\auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Student;
+use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -16,6 +17,14 @@ class authController extends Controller
         'studentID' => 'required', // Removed 'integer' in case ID has leading zeros or symbols
         'password' => 'required',
     ]);
+
+    $admin = Admin::where('email', $credentials['studentID'])->first();
+
+    if($admin && hash_equals((string) $admin->password, (string) $credentials['password'])){
+        Auth::guard('admin')->login($admin);
+        $request->session()->regenerate();
+        return redirect()->route('admin.dashboard');
+    }
 
     $user = Student::query()->where('studentID', $credentials['studentID'])->first();
 

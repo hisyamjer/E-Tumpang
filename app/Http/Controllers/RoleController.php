@@ -47,4 +47,10 @@ class RoleController extends Controller
 
         return redirect()->intended(route('dashboard'));
     }
+
+    public function reset(Request $request){
+        session()->forget('user_role');
+        
+        return redirect()->route('role.index');
+    }
 }
