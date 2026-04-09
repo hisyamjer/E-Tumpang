@@ -38,6 +38,7 @@ class authController extends Controller
 
     throw ValidationException::withMessages([
         'studentID' => ['The provided credentials do not match our records.'],
+        'password' => ['Please check your password and try again.']
     ]);
     }
 

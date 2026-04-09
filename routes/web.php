@@ -7,7 +7,6 @@ use App\Http\Controllers\auth\authController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\carController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\historyController;
 
 
 Route::get('/', function () {
@@ -52,6 +51,6 @@ Route::middleware(['auth', 'check.role'])->group(function () {
     Route::post('/booking/{trip}', [BookingController::class, 'join']);
     Route::delete('/booking/{id}', [BookingController::class, 'destroy']);
 
-    Route::get('/history', [historyController::class, 'index']);
+    Route::get('/history', [destinationController::class, 'history']);
 
 });

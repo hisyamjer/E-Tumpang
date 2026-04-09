@@ -16,6 +16,7 @@ class destinationController extends Controller
             ->where('studentID', auth()->id())
             ->where('status', 'available')
             ->withCount('bookings')
+            ->with(['bookings.student'])
             ->orderByDesc('departure_time')
             ->get()
             ->map(function ($trip) use ($now) {
@@ -155,4 +156,23 @@ class destinationController extends Controller
 
         return back()->with('message', 'Trip marked as arrived');
     }
+
+    public function history(){
+
+        $now = now(config('app.timezone'));
+        
+        $history = Trip::query()
+            ->where('studentID', auth()->id())
+            ->where('status', 'completed')
+            ->withCount('bookings')
+            ->orderByDesc('date')
+            ->orderByDesc('departure_time')
+            ->paginate(10);
+
+        return Inertia::render('History/index', [
+            'history' => $history,
+        ]);
+
+    }
+    
 }

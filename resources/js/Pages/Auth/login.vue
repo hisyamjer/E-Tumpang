@@ -63,6 +63,9 @@ const submit = () => {
                   v-model="form.password" 
                   placeholder="password" 
                 />
+                <span v-if="form.errors.password" class="text-xs text-destructive">
+                  {{ form.errors.password }}
+                </span>
               </div>
             </div>
             
