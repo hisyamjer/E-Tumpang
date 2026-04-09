@@ -28,6 +28,9 @@ Route::middleware('guest:web,admin')->group(function () {
 
 Route::middleware('auth:admin')->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::get('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
+    Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
 });
 
 Route::middleware('auth')->group(function () {

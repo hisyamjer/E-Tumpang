@@ -63,7 +63,8 @@ import {
       ]} 
     if (role.value === 'admin'){
       return[
-        { name: 'Home', icon: Home, link: '/admin' },
+        { name: 'Dashboard', icon: Home, link: '/admin' },
+        { name: 'Students', icon: UserCircle, link: '/admin/users' },
 
       ]
     }
