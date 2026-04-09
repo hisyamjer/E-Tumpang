@@ -59,13 +59,18 @@ import {
         { name: 'My Vehicles', icon: UserCircle, link: '/car'},
         { name: 'History', icon: History, link: '/history' }
 
+      ]} 
+    if (role.value === 'admin'){
+      return[
+        { name: 'Home', icon: Home, link: '/admin' },
+
       ]
-    } else {
+    }
+    else {
       return [
         { name: 'Home', icon: Home, link: '/dashboard' },
         { name: 'Booking', icon: Car, link: '/booking' },
-      ]
-    }
+      ]}
   })
 </script>
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\auth\authController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\carController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\AdminController;
 
 
 Route::get('/', function () {
@@ -26,7 +27,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth:admin')->group(function () {
-    
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
 });
 
 Route::middleware('auth')->group(function () {
