@@ -23,7 +23,7 @@ return new class extends Migration
         });
 
         Schema::create('feedback', function (Blueprint $table) {
-            $table->id('feedbackID')->primary();
+            $table->id('feedbackID');
             $table->unsignedBigInteger('tripID');
             $table->foreign('tripID')->references('tripID')->on('trip')->onDelete('cascade');
             $table->unsignedBigInteger('studentID');
