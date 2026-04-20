@@ -8,6 +8,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\carController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\FeedbackController;
 
 
 Route::get('/', function () {
@@ -31,9 +32,11 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
     Route::get('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
     Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
+    Route::post('/admin/users/{student}/block', [AdminController::class, 'blockStudent'])->name('admin.users.block');
+    Route::post('/admin/users/{student}/unblock', [AdminController::class, 'unblockStudent'])->name('admin.users.unblock');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'student.not_blocked'])->group(function () {
     // The selection page
     Route::get('/choose-role', [RoleController::class, 'index'])->name('role.index');
     // The selection logic
@@ -41,11 +44,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/reset-role', [RoleController::class, 'reset'])->name('role.reset');
 });
 
-Route::middleware(['auth', 'check.role'])->group(function () {
-    
+Route::middleware(['auth', 'student.not_blocked', 'check.role'])->group(function () {
+     
     // --- SHARED ROUTES ---
     Route::get('/dashboard', [dashboardController::class, 'index'])->name('dashboard');
-    Route::get('/history', [destinationController::class, 'history']);
+    Route::get('/history', [destinationController::class, 'history'])->name('history');
 
     // --- DRIVER ROUTES ---
     Route::group([], function () {
@@ -67,6 +70,7 @@ Route::middleware(['auth', 'check.role'])->group(function () {
         Route::get('/booking', [BookingController::class, 'index'])->name('booking');
         Route::post('/booking/{trip}', [BookingController::class, 'join']);
         Route::delete('/booking/{id}', [BookingController::class, 'destroy']);
+        Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
     });
 
 });

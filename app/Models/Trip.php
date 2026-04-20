@@ -59,6 +59,11 @@ class Trip extends Model
         return $this->available_seats - $this->bookings()->count();
     }
 
+    public function feedback(){
+        
+        return $this->hasOne(Feedback::class, 'tripID', 'tripID');
+    }
+
     
 
 }

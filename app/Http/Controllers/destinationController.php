@@ -157,22 +157,41 @@ class destinationController extends Controller
         return back()->with('message', 'Trip marked as arrived');
     }
 
-    public function history(){
-
-        $now = now(config('app.timezone'));
+    public function history()
+    {
+        $user = auth()->user();
+        $studentIdentifier = $user->studentID;
         
+        // Check the SESSION role, not the DB role
+        $sessionRole = session('user_role');
+
+        if ($sessionRole === 'driver') {
+            $history = Trip::query()
+                ->where('studentID', $studentIdentifier)
+                ->where('status', 'completed')
+                ->withCount('bookings')
+                ->orderByDesc('date')
+                ->orderByDesc('departure_time')
+                ->paginate(10);
+
+            return Inertia::render('History/index', [
+                'history' => $history,
+            ]);
+        } 
+
+        // If session is 'passenger'
         $history = Trip::query()
-            ->where('studentID', auth()->id())
+            ->whereHas('bookings', function ($query) use ($studentIdentifier) {
+                $query->where('studentID', $studentIdentifier); 
+            })
             ->where('status', 'completed')
             ->withCount('bookings')
             ->orderByDesc('date')
             ->orderByDesc('departure_time')
             ->paginate(10);
 
-        return Inertia::render('History/index', [
+        return Inertia::render('History/passenger', [
             'history' => $history,
         ]);
-
     }
-    
 }

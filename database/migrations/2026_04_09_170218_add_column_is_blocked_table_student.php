@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('student', function (Blueprint $table) {
-            $table->id('studentID');
-            $table->string('email')->index();
-            $table->string('name');
-            $table->string('password');
-            $table->string('phone_number')->nullable();
-        });
-
+        Schema::table('student', function (Blueprint $table) {
+        $table->boolean('is_blocked')->default(false)->after('phone_number');
+         });
     }
 
     /**
@@ -26,6 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('student');
+        //
     }
 };

@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\EnsureRoleSelected;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\EnsureStudentNotBlocked;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'check.role' => EnsureRoleSelected::class,
+            'student.not_blocked' => EnsureStudentNotBlocked::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

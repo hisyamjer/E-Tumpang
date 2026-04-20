@@ -30,6 +30,12 @@ class authController extends Controller
 
     $user = Student::query()->where('studentID', $credentials['studentID'])->first();
 
+    if ($user && $user->is_blocked) {
+        throw ValidationException::withMessages([
+            'studentID' => ['Your account has been blocked. Please contact admin.'],
+        ]);
+    }
+
     // Plaintext password comparison is insecure and not recommended.
     // This only works if the DB stores the raw password text (not bcrypt/argon hashes).
     if ($user && hash_equals((string) $user->password, (string) $credentials['password'])) {

@@ -72,6 +72,7 @@ import {
       return [
         { name: 'Home', icon: Home, link: '/dashboard' },
         { name: 'Booking', icon: Car, link: '/booking' },
+        { name: 'History', icon: History, link: '/history' },
       ]}
   })
 </script>

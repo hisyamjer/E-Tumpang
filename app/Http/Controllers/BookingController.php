@@ -17,6 +17,8 @@ class BookingController extends Controller
             ->with([
                 'trip' => fn ($query) => $query->withCount('bookings'),
             ])
+            ->where('status', 'pending')
+            ->orderByDesc('booking_date')
             ->get();
 
         return Inertia::render('Booking/index', [

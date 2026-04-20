@@ -25,6 +25,7 @@ class AdminController extends Controller
                     'name' => $student->name,
                     'email' => $student->email,
                     'phone_number' => $student->phone_number,
+                    'is_blocked' => (bool) $student->is_blocked,
                     'role' => $student->user?->role,
                     'plate_number' => $student->user?->plate_number,
                     'model' => $student->user?->model,
@@ -83,5 +84,23 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.users')
             ->with('message', 'Student created successfully.');
+    }
+
+    public function blockStudent(Student $student)
+    {
+        $student->update(['is_blocked' => true]);
+
+        return redirect()
+            ->route('admin.users')
+            ->with('message', 'Student blocked.');
+    }
+
+    public function unblockStudent(Student $student)
+    {
+        $student->update(['is_blocked' => false]);
+
+        return redirect()
+            ->route('admin.users')
+            ->with('message', 'Student unblocked.');
     }
 }

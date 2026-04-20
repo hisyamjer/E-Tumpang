@@ -16,11 +16,13 @@ class Student extends Authenticatable
     use HasFactory, Notifiable;
     protected $table = 'student';
     protected $primaryKey = 'studentID';
+    public $timestamps = false;
     protected $fillable = [
         'name',
         'email',
         'password',
         'phone_number',
+        'is_blocked',
     ];
     protected $hidden = [
         'password',
@@ -36,7 +38,7 @@ class Student extends Authenticatable
      */
     protected function casts(): array
     {
-        return [];
+        return ['is_blocked' => 'boolean'];
     }
 
     public function user()
@@ -54,4 +56,3 @@ class Student extends Authenticatable
         return $this->hasMany(Booking::class, 'studentID', 'studentID');
     }
 }
-
