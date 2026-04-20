@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('role')->enum('passenger', 'driver', 'admin');
             $table->string('plate_number')->nullable();
             $table->string('password');
+            $table->string('model')->nullable();
             $table->timestamps();
         });
 
