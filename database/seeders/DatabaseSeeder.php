@@ -27,7 +27,7 @@ Student::create([
 // Data Admin
 Admin::create([
     'email' => 'admin@example.com',
-    'password' =>  Hash::make('password'),
+    'password' =>  Hash::make('password')   ,
 ]);
     }
 }

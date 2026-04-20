@@ -23,5 +23,9 @@ class Admin extends Authenticatable
         'password',
     ];
 
+    public function getAuthIdentifierName()
+    {
+        return 'email';
+    }
 
 }
