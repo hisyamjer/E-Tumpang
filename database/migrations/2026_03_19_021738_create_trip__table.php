@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreign('studentID')->references('studentID')->on('student')->onDelete('cascade');
             $table->string('destination');
             $table->time('departure_time');
+            $table->date('date');
             $table->integer('available_seats');
             $table->double('price', 10, 2);
             $table->string('status')->enum('arrived', 'confirmed', 'completed', 'cancelled');
