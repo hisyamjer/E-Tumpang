@@ -116,7 +116,7 @@ const formatDate = (dateString) => {
                 {{ formatDate(trip.date) }}
               </Badge>
               <Badge variant="outline" class="bg-background whitespace-nowrap">
-                {{ formatTime(trip.departure_time) }}
+                {{ formatTime(trip.departure_at) }}
               </Badge>
               <Badge :variant="trip.status === 'available'">
                 {{ trip.status }}

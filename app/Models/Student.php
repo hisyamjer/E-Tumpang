@@ -16,13 +16,16 @@ class Student extends Authenticatable
     use HasFactory, Notifiable;
     protected $table = 'student';
     protected $primaryKey = 'studentID';
+    protected $keyType = 'int';
     public $timestamps = false;
     protected $fillable = [
+        'studentID',
         'name',
         'email',
         'password',
         'phone_number',
         'is_blocked',
+        'gender',
     ];
     protected $hidden = [
         'password',

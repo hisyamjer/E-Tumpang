@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Student;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 
 class AdminController extends Controller
@@ -26,6 +27,7 @@ class AdminController extends Controller
                     'email' => $student->email,
                     'phone_number' => $student->phone_number,
                     'is_blocked' => (bool) $student->is_blocked,
+                    'gender' => $student->gender,
                     'role' => $student->user?->role,
                     'plate_number' => $student->user?->plate_number,
                     'model' => $student->user?->model,
@@ -46,10 +48,10 @@ class AdminController extends Controller
     public function storeUser(Request $request)
     {
         $validated = $request->validate([
-            'studentID' => ['required', 'string', 'max:255', 'unique:student,studentID'],
+            'studentID' => ['required', 'string', 'max:255', 'regex:/^\\d+$/', 'unique:student,studentID'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:student,email'],
-            // Stored as plain text in this project.
+            'gender' => ['required', 'in:male,female'],
             'password' => ['required', 'string', 'max:255'],
             'phone_number' => ['nullable', 'string', 'max:255'],
             'role' => ['nullable', 'in:driver,passenger'],
@@ -62,22 +64,31 @@ class AdminController extends Controller
             'studentID' => $validated['studentID'],
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => $validated['password'],
+            'password' => Hash::make($validated['password']),
             'phone_number' => $validated['phone_number'] ?? null,
+            'gender' => $validated['gender'] ?? null,
         ]);
 
-        $hasAnyUserRowData = ($validated['role'] ?? null)
-            || ($validated['plate_number'] ?? null)
-            || ($validated['model'] ?? null)
-            || array_key_exists('is_default', $validated);
+        $role = $validated['role'] ?? null;
+        $plateNumber = $validated['plate_number'] ?? null;
+        $model = $validated['model'] ?? null;
+        $isDefault = (bool) ($validated['is_default'] ?? false);
+
+        $hasAnyUserRowData = (bool) $role || (bool) $plateNumber || (bool) $model || $isDefault;
+
+        if ($hasAnyUserRowData && !$role) {
+            return back()
+                ->withErrors(['role' => 'Role is required when setting vehicle/default details.'])
+                ->withInput();
+        }
 
         if ($hasAnyUserRowData) {
             User::create([
                 'studentID' => $student->studentID,
-                'role' => $validated['role'] ?? null,
-                'plate_number' => $validated['plate_number'] ?? null,
-                'model' => $validated['model'] ?? null,
-                'is_default' => (bool) ($validated['is_default'] ?? false),
+                'role' => $role,
+                'plate_number' => $plateNumber,
+                'model' => $model,
+                'is_default' => $isDefault,
             ]);
         }
 

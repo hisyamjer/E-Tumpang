@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 // Added Car and Info icons
 import { Calendar, Clock, MapPin, Users, Car, Info, XCircle } from 'lucide-vue-next'
+import { formatDateDMY, formatTime12h } from '@/lib/datetime'
 
 const props = defineProps({
   bookings: {
@@ -17,22 +18,6 @@ const props = defineProps({
 })
 
 const bookingRows = computed(() => (Array.isArray(props.bookings) ? props.bookings : []))
-
-const formatTime = (timeString) => {
-  if (!timeString) return ''
-  const parts = String(timeString).split(':')
-  let hours = parseInt(parts[0], 10)
-  const minutes = parts[1] ?? '00'
-  const ampm = hours >= 12 ? 'PM' : 'AM'
-  hours = hours % 12
-  hours = hours ? hours : 12
-  return `${hours}:${minutes} ${ampm}`
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-GB')
-}
 
 const genderPrefLabel = (pref) => {
   if (!pref) return 'Mixed (Everyone)'
@@ -105,11 +90,11 @@ const error   = computed(() => page.props.flash.error)
             <div class="flex items-center justify-between gap-2">
               <Badge variant="outline" class="bg-background whitespace-nowrap flex items-center gap-1">
                 <Clock class="h-3.5 w-3.5" />
-                {{ formatTime(booking.trip?.departure_time) }}
+                {{ formatTime12h(booking.trip?.departure_at) }}
               </Badge>
               <Badge variant="outline" class="bg-background whitespace-nowrap flex items-center gap-1">
                 <Calendar class="h-3.5 w-3.5" />
-                {{ formatDate(booking.trip?.date) }}
+                {{ formatDateDMY(booking.trip?.departure_at) }}
               </Badge>
             </div>
 

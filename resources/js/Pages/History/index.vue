@@ -7,17 +7,17 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Calendar, Banknote } from 'lucide-vue-next';
+import { formatDateDMY, formatTime12h } from '@/lib/datetime';
 
 const props = defineProps<{
   history: {
     data : Array<{
       id : number;
       destination : string;
-      departure_time : string;
+      departure_at : string;
       price : number;
       bookings_count : number;
       status : string;
-      date : Date;
     }>;
   };
 }>();
@@ -89,8 +89,8 @@ const totalPassengers = props.history.data.reduce((acc, trip) => {
                         <TableBody>
                             <TableRow v-for="trip in history.data" :key="trip.id">
                                 <TableCell class="font-medium">
-                                    {{ trip.date }} <br/>
-                                    <span class="text-xs text-muted-foreground">{{ trip.departure_time }}</span>
+                                    {{ formatDateDMY(trip.departure_at) }} <br/>
+                                    <span class="text-xs text-muted-foreground">{{ formatTime12h(trip.departure_at) }}</span>
                                 </TableCell>
                                 <TableCell>{{ trip.destination }}</TableCell>
                                 <TableCell>

@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { formatDateDMY, formatTime12h } from '@/lib/datetime';
 import {
   Dialog,
   DialogContent,
@@ -34,22 +35,6 @@ const props = defineProps({
 const tripRows = computed(() =>
   Array.isArray(props.trip) && props.trip.length ? props.trip : props.trips
 );
-
-const formatTime = (timeString) => {
-  if (!timeString) return '';
-  const parts = timeString.split(':');
-  let hours = parseInt(parts[0]);
-  const minutes = parts[1];
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  return `${hours}:${minutes} ${ampm}`;
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('en-GB'); 
-};
 
 const genderPrefLabel = (pref) => {
   if (!pref) return 'Mixed (Everyone)';
@@ -109,8 +94,8 @@ const error   = computed(() => page.props.flash.error)
         <Card v-for="trip in tripRows" :key="trip.tripID" class="overflow-hidden">
           <CardHeader class="bg-primary/5 pb-4 space-y-3">
             <div class="flex justify-between items-center">
-              <Badge variant="outline" class="bg-background whitespace-nowrap">{{ formatTime(trip.departure_time) }}</Badge>
-              <Badge variant="outline" class="bg-background whitespace-nowrap">{{ formatDate(trip.date) }}</Badge>
+              <Badge variant="outline" class="bg-background whitespace-nowrap">{{ formatTime12h(trip.departure_at) }}</Badge>
+              <Badge variant="outline" class="bg-background whitespace-nowrap">{{ formatDateDMY(trip.departure_at) }}</Badge>
               <Badge :variant="trip.status === 'available' ? 'default' : 'secondary'">
                 {{ trip.status }}
               </Badge>

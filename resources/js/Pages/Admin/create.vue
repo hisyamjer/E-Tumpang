@@ -5,12 +5,20 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ChevronLeft } from 'lucide-vue-next'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const form = useForm({
   studentID: '',
   name: '',
   email: '',
   password: '',
+  gender: '',
   phone_number: '',
   role: '',
   plate_number: '',
@@ -94,6 +102,20 @@ const submit = () => {
             <Label for="model">Car Model (optional)</Label>
             <Input id="model" v-model="form.model" type="text" />
             <p v-if="form.errors.model" class="text-xs text-destructive">{{ form.errors.model }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <Label for="gender">Gender</Label>
+            <Select v-model="form.gender">
+              <SelectTrigger id="gender">
+                <SelectValue placeholder="Select Gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+              </SelectContent>
+            </Select>
+            <p v-if="form.errors.gender" class="text-xs text-destructive">{{ form.errors.gender }}</p>
           </div>
         </div>
 

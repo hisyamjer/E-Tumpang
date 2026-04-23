@@ -22,11 +22,21 @@ class authController extends Controller
     $admin = Admin::where('email', $credentials['studentID'])->first();
          
     // Passwords should be stored hashed (bcrypt/argon) for production.
-    if ($admin && Hash::check((string) $credentials['password'], (string) $admin->password)) {
+    if ($admin) {
+        $plain = (string) $credentials['password'];
+        $stored = (string) $admin->password;
+
+        $isValid = Hash::check($plain, $stored) || hash_equals($stored, $plain);
+        if ($isValid && !Hash::check($plain, $stored)) {
+            $admin->forceFill(['password' => Hash::make($plain)])->save();
+        }
+
+        if ($isValid) {
         Auth::guard('admin')->login($admin);
         $request->session()->forget('user_role');
         $request->session()->regenerate();
         return redirect()->route('admin.dashboard');
+        }
     }
 
     $user = Student::query()->where('studentID', $credentials['studentID'])->first();
@@ -37,12 +47,22 @@ class authController extends Controller
         ]);
     }
 
-    if ($user && Hash::check((string) $credentials['password'], (string) $user->password)) {
+    if ($user) {
+        $plain = (string) $credentials['password'];
+        $stored = (string) $user->password;
+
+        $isValid = Hash::check($plain, $stored) || hash_equals($stored, $plain);
+        if ($isValid && !Hash::check($plain, $stored)) {
+            $user->forceFill(['password' => Hash::make($plain)])->save();
+        }
+
+        if ($isValid) {
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
         // Let the middleware force role selection first.
         return redirect()->route('role.index');
+        }
     }
 
     if (false && Auth::attempt($credentials)) {

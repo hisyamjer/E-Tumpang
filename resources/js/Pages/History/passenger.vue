@@ -10,14 +10,14 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { MapPin, Clock, Star, Receipt } from 'lucide-vue-next';
+import { formatDateDMY, formatTime12h } from '@/lib/datetime';
 
 const props = defineProps<{
     history: {
         data: Array<{
             id: number;
             destination: string;
-            departure_time: string;
-            date: string;
+            departure_at: string;
             price: number;
             status: string;
             has_feedback: boolean;
@@ -74,7 +74,9 @@ const submitFeedback = () => {
                         <div>
                             <h4 class="font-medium text-slate-900">{{ trip.destination }}</h4>
                             <div class="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                                <span>{{ trip.date }}</span>
+                                <span>{{ formatDateDMY(trip.departure_at) }}</span>
+                                <span class="text-slate-300">•</span>
+                                <span>{{ formatTime12h(trip.departure_at) }}</span>
                                 <span class="text-slate-300">•</span>
                                 <span class="font-medium text-slate-700">RM {{ trip.price.toFixed(2) }}</span>
                             </div>

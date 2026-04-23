@@ -41,11 +41,24 @@ class dashboardController extends Controller
             ]);
         }
 
+        $search = $request->input('search');
+
+        $userGender = auth()->user()->gender;
+
         $trips = Trip::query()
             ->with(['student'])
             ->withCount('bookings')
             ->where('status', 'available')
             ->where('studentID', '!=', auth()->id())
+            ->where(function ($query) use ($search) {
+                $query->where('destination', 'like', "%{$search}%");
+            })
+
+            ->where(function ($query) use ($userGender) {
+                $query->where('gender_pref','mixed', $userGender)
+                    ->orWhere('gender_pref', $userGender);
+            })
+
             ->orderBy('departure_at')
             ->get()
             ->filter(function ($trip) {
@@ -62,6 +75,7 @@ class dashboardController extends Controller
 
         return Inertia::render('DBpassenger/index', [
             'trips' => $trips,
+            'filters' => $request->only('search'),
         ]);
     }
 }

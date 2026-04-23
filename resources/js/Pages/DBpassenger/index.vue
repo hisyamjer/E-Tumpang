@@ -1,12 +1,13 @@
 <script setup>
 import appLayout from '@/Layouts/sidebar.vue'
-import { computed } from 'vue'
-import { Head, router, Link, usePage } from '@inertiajs/vue3'
+import { computed, ref, watch} from 'vue'
+import { Head, router, Link, usePage,} from '@inertiajs/vue3'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { MapPin, Clock, Calendar, Users, Info, User, Phone, Car, Hash } from 'lucide-vue-next'
+import { MapPin, Clock, Calendar, Users, Info, User, Phone, Car, Hash, Search } from 'lucide-vue-next'
+import { formatDateDMY, formatTime12h } from '@/lib/datetime'
 
 // Import your existing shadcn dialog components
 import {
@@ -24,25 +25,29 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  filters: Object,
 })
 
+const search = ref(props.filters?.search || '')
+
+let searchTimeoutId = null;
+
+function ApplySearch() {
+  // Clear timeout lama kalau user tengah laju menaip
+  if (searchTimeoutId !== null) clearTimeout(searchTimeoutId);
+  
+  // Set delay 250ms
+  searchTimeoutId = setTimeout(() => {
+    // Tukar dari { q: filters.q } kepada { search: search.value }
+    router.get("/dbpassenger", { search: search.value }, { 
+        preserveScroll: true, 
+        preserveState: true, 
+        replace: true 
+    });
+  }, 250);
+}
+
 const tripRows = computed(() => (Array.isArray(props.trips) ? props.trips : []))
-
-const formatTime = (timeString) => {
-  if (!timeString) return ''
-  const parts = String(timeString).split(':')
-  let hours = parseInt(parts[0], 10)
-  const minutes = parts[1] ?? '00'
-  const ampm = hours >= 12 ? 'PM' : 'AM'
-  hours = hours % 12
-  hours = hours ? hours : 12
-  return `${hours}:${minutes} ${ampm}`
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-GB')
-}
 
 const genderPrefLabel = (pref) => {
   if (!pref) return 'Mixed (Everyone)'
@@ -95,6 +100,23 @@ const error   = computed(() => page.props.flash.error)
 
       <Separator />
 
+      <div class="flex items-center space-x-2 w-full max-w-sm mb-2">
+        <div class="relative w-full">
+          <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <input 
+            v-model="search" 
+            @input="ApplySearch"
+            type="text" 
+            placeholder="Search destination" 
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-9"
+          />
+        </div>
+      </div>
+      
+      <div v-if="search" class="text-sm text-muted-foreground mb-4">
+        Your search: <span class="font-medium text-primary">{{ search }}</span>
+      </div>
+
       <div v-if="!tripRows.length" class="rounded-lg border bg-muted/30 p-8 text-center">
         <p class="text-sm text-muted-foreground">No available trips right now.</p>
       </div>
@@ -103,15 +125,15 @@ const error   = computed(() => page.props.flash.error)
         <Card v-for="trip in tripRows" :key="trip.tripID" class="overflow-hidden border-slate-200 shadow-sm transition-all hover:shadow-md">
           <CardHeader class="bg-primary/5 pb-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <Badge variant="outline" class="bg-background font-semibold">
-                <Calendar class="mr-1 h-3.5 w-3.5 text-primary" />
-                {{ formatDate(trip.date) }}
-              </Badge>
-              <Badge variant="outline" class="bg-background font-semibold">
-                <Clock class="mr-1 h-3.5 w-3.5 text-primary" />
-                {{ formatTime(trip.departure_time) }}
-              </Badge>
-            </div>
+                <Badge variant="outline" class="bg-background font-semibold">
+                  <Calendar class="mr-1 h-3.5 w-3.5 text-primary" />
+                  {{ formatDateDMY(trip.departure_at) }}
+                </Badge>
+                <Badge variant="outline" class="bg-background font-semibold">
+                  <Clock class="mr-1 h-3.5 w-3.5 text-primary" />
+                  {{ formatTime12h(trip.departure_at) }}
+                </Badge>
+              </div>
 
             <CardTitle class="pt-2 text-base font-bold flex items-start gap-2">
               <MapPin class="mt-0.5 h-4 w-4 text-primary shrink-0" />

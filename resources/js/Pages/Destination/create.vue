@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'; 
+import { onMounted } from 'vue'; 
 import appLayout from '@/Layouts/sidebar.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Clock, Users, Banknote, Calendar, Car, Info, ChevronLeft } from 'lucide-vue-next';
+import { MapPin, Car, ChevronLeft } from 'lucide-vue-next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -17,13 +17,12 @@ const props = defineProps({
 
 const form = useForm({
   destination: '',
-  departure_time: '',
+  departure_at: '',
   available_seats: 4,
   status: 'available',
   price: '',
   latitude: 3.1390,
   longitude: 101.6869,
-  date: '',
   gender_pref: 'Mixed',
   description: '',
   car_model: props.auth.user.model || '', 
@@ -117,16 +116,11 @@ const submit = () => { form.post('/destination'); };
           </div>
 
           <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-             <div class="space-y-2">
-               <Label class="text-slate-700">Departure Date</Label>
-               <Input type="date" v-model="form.date" />
-               <p v-if="form.errors.date" class="text-xs text-destructive">{{ form.errors.date }}</p>
-             </div>
-             <div class="space-y-2">
-               <Label class="text-slate-700">Departure Time</Label>
-               <Input type="time" v-model="form.departure_time" />
-               <p v-if="form.errors.departure_time" class="text-xs text-destructive">{{ form.errors.departure_time }}</p>
-             </div>
+              <div class="space-y-2 sm:col-span-2">
+                <Label class="text-slate-700">Departure Date & Time</Label>
+                <Input type="datetime-local" v-model="form.departure_at" />
+                <p v-if="form.errors.departure_at" class="text-xs text-destructive">{{ form.errors.departure_at }}</p>
+              </div>
              <div class="space-y-2">
                <Label class="text-slate-700">Available Seats</Label>
                <Input type="number" v-model="form.available_seats" min="1" max="6" />
@@ -180,8 +174,8 @@ const submit = () => { form.post('/destination'); };
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Mixed">Mixed (Default)</SelectItem>
-                  <SelectItem value="Male Only">Male Only</SelectItem>
-                  <SelectItem value="Female Only">Female Only</SelectItem>
+                  <SelectItem value="male">Male Only</SelectItem>
+                  <SelectItem value="female">Female Only</SelectItem>
                 </SelectContent>
               </Select>
               <p v-if="form.errors.gender_pref" class="text-xs text-destructive">{{ form.errors.gender_pref }}</p>

@@ -14,6 +14,7 @@ type StudentRow = {
   role: string | null
   plate_number: string | null
   model: string | null
+  gender: string | null
 }
 
 const props = defineProps<{
@@ -55,6 +56,7 @@ const message = computed(() => page.props.flash.message)
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
+              <TableHead>Gender</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Plate No.</TableHead>
               <TableHead>Model</TableHead>
@@ -67,6 +69,7 @@ const message = computed(() => page.props.flash.message)
                 <TableCell>{{ student.name }}</TableCell>
                 <TableCell>{{ student.email }}</TableCell>
                 <TableCell>{{ display(student.phone_number) }}</TableCell>
+                <TableCell>{{ display(student.gender) }}</TableCell>
                 <TableCell>{{ display(student.role) }}</TableCell>
                 <TableCell>{{ display(student.plate_number) }}</TableCell>
                 <TableCell>{{ display(student.model) }}</TableCell>
