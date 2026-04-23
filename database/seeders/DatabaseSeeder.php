@@ -20,6 +20,7 @@ Student::create([
     'studentID' => '2024991653',
     'name' => 'Zulhilmi Hisyam',
     'email' => 'hisyamjer18@gmail.com',
+    'gender' => 'male',
     'password' =>  Hash::make('password'),   
     'phone_number' => '0123456789',
 ]);
