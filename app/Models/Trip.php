@@ -21,8 +21,7 @@ class Trip extends Model
         'description',
         'gender_pref',
         'destination',
-        'departure_time',
-        'date',
+        'departure_at',
         'available_seats',
         'price',
         'status',
@@ -34,7 +33,7 @@ class Trip extends Model
     protected $casts = [
     'latitude' => 'float',
     'longitude' => 'float',
-    'date' => 'date:Y-m-d',
+    'departure_at' => 'datetime',
  ];
 
     protected $appends = ['seats_remaining'];

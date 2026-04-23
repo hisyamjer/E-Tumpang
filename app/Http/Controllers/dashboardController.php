@@ -26,19 +26,9 @@ class dashboardController extends Controller
                     }
 
                     // Hide the trip if within 1 hour of departure
-                    $departureTime = trim((string) $trip->departure_time);
-                    if (preg_match('/^\d{2}:\d{2}$/', $departureTime)) {
-                        $departureTime .= ':00';
-                    }
-
-                    $tripDate = $trip->date instanceof \Carbon\CarbonInterface
-                        ? $trip->date->format('Y-m-d')
-                        : trim((string) $trip->date);
-                    $departure = \Carbon\Carbon::createFromFormat(
-                        'Y-m-d H:i:s',
-                        $tripDate . ' ' . $departureTime,
-                        config('app.timezone')
-                    );
+                    $departure = $trip->departure_at instanceof \Carbon\CarbonInterface
+                        ? $trip->departure_at->copy()->timezone(config('app.timezone'))
+                        : \Carbon\Carbon::parse((string) $trip->departure_at, config('app.timezone'));
 
                     return now(config('app.timezone'))->addHour()->lessThan($departure);
                 })
@@ -56,23 +46,12 @@ class dashboardController extends Controller
             ->withCount('bookings')
             ->where('status', 'available')
             ->where('studentID', '!=', auth()->id())
-            ->orderBy('date')
-            ->orderBy('departure_time')
+            ->orderBy('departure_at')
             ->get()
             ->filter(function ($trip) {
-                $departureTime = trim((string) $trip->departure_time);
-                if (preg_match('/^\d{2}:\d{2}$/', $departureTime)) {
-                    $departureTime .= ':00';
-                }
-
-                $tripDate = $trip->date instanceof \Carbon\CarbonInterface
-                    ? $trip->date->format('Y-m-d')
-                    : trim((string) $trip->date);
-                $departure = \Carbon\Carbon::createFromFormat(
-                    'Y-m-d H:i:s',
-                    $tripDate . ' ' . $departureTime,
-                    config('app.timezone')
-                );
+                $departure = $trip->departure_at instanceof \Carbon\CarbonInterface
+                    ? $trip->departure_at->copy()->timezone(config('app.timezone'))
+                    : \Carbon\Carbon::parse((string) $trip->departure_at, config('app.timezone'));
 
                 // Only show if current time + 1 hour is still BEFORE departure
                 return now(config('app.timezone'))->addHour()->lessThan($departure);

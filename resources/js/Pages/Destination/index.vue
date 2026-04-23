@@ -21,6 +21,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  hasActiveTrip: {
+    type: Boolean,
+    default: false
+  },
   trip: {
     type: Array,
     default: () => [],
@@ -84,7 +88,7 @@ const error   = computed(() => page.props.flash.error)
           <h1 class="text-2xl font-bold tracking-tight">Driver Console</h1>
           <p class="text-muted-foreground">Manage your active trips and passengers.</p>
         </div>
-        <Button as-child>
+        <Button v-if="!hasActiveTrip" as-child>
           <Link href="/destination/create">
             <Plus class="mr-2 h-4 w-4" /> New Trip
           </Link>
